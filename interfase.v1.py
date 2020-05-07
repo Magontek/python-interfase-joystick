@@ -170,14 +170,14 @@ while not done:
     # Limit to 20 frames per second.
     clock.tick(20)
 
-    if cont==50:
+    if cont==20:
         cont=0
+        out_string = "s"
         for i in range(5):
-            if eje_acum_old[i] != eje_acumulador[i]:
-                eje_acum_old[i] = eje_acumulador[i]
-                out_string = "ms"+"{}".format(letras[i])+"{:>6.3f}".format(eje_acumulador[i])
-                arduino.write(out_string.encode())
-                #time.sleep(1)
+            out_string +="{:>4.2f}".format(eje_acumulador[i])+" "
+            #print (out_string)
+            #time.sleep(1)
+        arduino.write(out_string.encode())
     else:
         cont += 1
 
