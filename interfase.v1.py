@@ -11,15 +11,19 @@ arduino.write(b'mv')
 
 input_string=['-','-','-','-','-','-','-','-','-','-']
 
-eje_acumulador=[90,90,90,90,90]
-eje_acum_old=[90,90,90,90,90]
 
 cont=0
 
 letras=['a','b','c','d','e']
 
+#---------------------------------ejes----------------
 
-#----------------------------Pantalla y ejes------------------
+eje_acumulador=[90,90,90,90,90]
+eje_acum_old=[90,90,90,90,90]
+
+eje_multiplicador=[1,2,1,2,2]
+
+#----------------------------Pantalla------------------
 # Define some colors.
 BLACK = pygame.Color('black')
 WHITE = pygame.Color('white')
@@ -118,7 +122,7 @@ while not done:
 
     for i in range(axes):
         axis = joystick.get_axis(i)
-        eje_acumulador[i]=eje_acumulador[i]+round(axis, 3)
+        eje_acumulador[i]=eje_acumulador[i]+round(axis*eje_multiplicador[i], 3)
         textPrint.tprint(screen, "Axis {} value: {:>6.3f}".format(i, axis))
         textPrint.tprint(screen, "Acum {} value: {:>6.3f}".format(i, eje_acumulador[i]))
     textPrint.unindent()
@@ -170,7 +174,7 @@ while not done:
     # Limit to 20 frames per second.
     clock.tick(20)
 
-    if cont==20:
+    if cont==1:
         cont=0
         out_string = "s"
         for i in range(5):
