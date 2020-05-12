@@ -21,7 +21,7 @@ letras=['a','b','c','d','e']
 eje_acumulador=[90,90,90,90,90]
 eje_acum_old=[90,90,90,90,90]
 
-eje_multiplicador=[1,2,1,2,2]
+eje_multiplicador=[1,0.5,1,2,2]
 
 #----------------------------Pantalla------------------
 # Define some colors.
