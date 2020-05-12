@@ -4,21 +4,26 @@ import time
 import serial
 
 #----------------------------Serie-------------------------
+#Arduino es el objeto serie donde se escribe todo
+#To-Do:
+#1) permitir modificar el puerto y no conectar hasta apretar conectar
 
 arduino = serial.Serial('COM7', 115200)
 time.sleep(2)
-arduino.write(b'mv')
+arduino.write(b'mv') #Indico que funcione en modo verborragico asi tengo feedback de lo que hace el arduino
 
-input_string=['-','-','-','-','-','-','-','-','-','-']
+input_string=['-','-','-','-','-','-','-','-','-','-'] #Aca se almacena lo que va llegando por el puerto serie
 
 
 cont=0
-
-letras=['a','b','c','d','e']
+#Deprecated. Implemente la escritura de todos los numero a la vez
+letras=['a','b','c','d','e'] 
 
 #---------------------------------ejes----------------
+#Variables que involucran los incremenos en los ejes y las velocidades de los incrementos
 
 eje_acumulador=[90,90,90,90,90]
+#Deprecated. De cuando esperaba cambios para enviar el dato
 eje_acum_old=[90,90,90,90,90]
 
 eje_multiplicador=[1,0.5,1,2,2]
@@ -29,9 +34,8 @@ BLACK = pygame.Color('black')
 WHITE = pygame.Color('white')
 
 
-# This is a simple class that will help us print to the screen.
-# It has nothing to do with the joysticks, just outputting the
-# information.
+# Esta es la clase en donde se va escribir el texto en pantalla
+# La robe del ejemplo de joystick del pygame
 class TextPrint(object):
     def __init__(self):
         self.reset()
@@ -56,53 +60,54 @@ class TextPrint(object):
 
 pygame.init()
 
-# Set the width and height of the screen (width, height).
+# Alto y ancho de la ventana
 screen = pygame.display.set_mode((500, 700))
 
+# Nombre de la pantalla
 pygame.display.set_caption("Controlador del brazo de 5 ejes")
 
-# Loop until the user clicks the close button.
+# Variable booleana para escapar del loop. Si se hace click en cerrar esto para a true
 done = False
 
-# Used to manage how fast the screen updates.
+# Este clock es para actualizar la pantalla, pero tambien para la frecuencia de envio de los datos serie
 clock = pygame.time.Clock()
 
-# Initialize the joysticks.
+# Inicializa los joysticks
 pygame.joystick.init()
 
-# Get ready to print.
+# Creo un objeto textprint para cargarle todo el texto
 textPrint = TextPrint()
 
 # -------- Main Program Loop -----------
 while not done:
     #
-    # EVENT PROCESSING STEP
+    # Proceso los evnetos
     #
-    # Possible joystick actions: JOYAXISMOTION, JOYBALLMOTION, JOYBUTTONDOWN,
-    # JOYBUTTONUP, JOYHATMOTION
+    # Posibles interracciones: JOYAXISMOTION, JOYBALLMOTION, JOYBUTTONDOWN, JOYBUTTONUP, JOYHATMOTION
     for event in pygame.event.get(): # User did something.
         if event.type == pygame.QUIT: # If user clicked close.
             done = True # Flag that we are done so we exit this loop.
+        # Estos no los uso pero me sirven para saber si se colgo el programa
         elif event.type == pygame.JOYBUTTONDOWN:
             print("Joystick button pressed.")
         elif event.type == pygame.JOYBUTTONUP:
             print("Joystick button released.")
 
-    #
-    # DRAWING STEP
-    #
-    # First, clear the screen to white. Don't put other drawing commands
-    # above this, or they will be erased with this command.
+    # Todo lo siguiente carga texto y dibuja la pantalla
+    # Borro la pantalla
     screen.fill(WHITE)
+    #Borro el texto de textprint
     textPrint.reset()
 
-    # Get count of joysticks.
+    # Se fija cuantos joiystics hay. Igual solo uso el primero
+    #To-Do: permitir selecionar joistick con un menu o algo
     joystick_count = pygame.joystick.get_count()
 
+    # Muestro cuantos joistciks hay conectados, asi se si le estoy errando al joystick
     textPrint.tprint(screen, "Number of joysticks: {}".format(joystick_count))
     textPrint.indent()
 
-    # For each joystick:
+    # i en este caso es el numero de joistick que voy a usar
     i=0
     joystick = pygame.joystick.Joystick(i)
     joystick.init()
@@ -110,12 +115,11 @@ while not done:
     textPrint.tprint(screen, "Joystick {}".format(i))
     textPrint.indent()
 
-        # Get the name from the OS for the controller/joystick.
+    # Imprimo el nombre del joistick.
     name = joystick.get_name()
     textPrint.tprint(screen, "Joystick name: {}".format(name))
 
-    # Usually axis run in pairs, up/down for one, and left/right for
-     # the other.
+    # Cantidad de ejes activos, el resto del programa supone 4
     axes = joystick.get_numaxes()
     textPrint.tprint(screen, "Number of axes: {}".format(axes))
     textPrint.indent()
@@ -131,6 +135,7 @@ while not done:
     textPrint.tprint(screen, "Number of buttons: {}".format(buttons))
     textPrint.indent()
 
+    # Leo todos los botones, todavia no lo uso pero estaba en el ejemplo
     for i in range(buttons):
         button = joystick.get_button(i)
         textPrint.tprint(screen, "Button {:>2} value: {}".format(i, button))
@@ -140,8 +145,7 @@ while not done:
     textPrint.tprint(screen, "Number of hats: {}".format(hats))
     textPrint.indent()
 
-    # Hat position. All or nothing for direction, not a float like
-    # get_axis(). Position is a tuple of int values (x, y).
+    # Posicion del pob, da uno o cero, pero la variable es tipo int en forma de tupla (x, y)
     for i in range(hats):
         hat = joystick.get_hat(i)
         textPrint.tprint(screen, "Hat {} value: {}".format(i, str(hat)))
@@ -150,6 +154,8 @@ while not done:
     textPrint.unindent()
 
     textPrint.unindent()
+    # Leo la informacion que llega por serie si es que llega
+    # Desplaza todo el texto un lugar arriba y escribe la linea entrante abajo
     textPrint.tprint(screen, "----Serial----".format(hats))
     while arduino.in_waiting > 0:
         for i in range(9):
@@ -164,23 +170,19 @@ while not done:
 
     
 
-    #
-    # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
-    #
-
-    # Go ahead and update the screen with what we've drawn.
+    # Imprimo en pantalla todo lo que escribi, Solo se puede scribir cosas en pantalla hasta aca
     pygame.display.flip()
 
-    # Limit to 20 frames per second.
+    # 20 FPS y de paso es la velocidad maxima de envio por el puerto serie
     clock.tick(20)
 
+    #Divido el tiempo a la mitad, para enviar 10 datos por segundo
+    # Transmitiendo a 115200 baudios deberia alcanzar para transmitir los 5 paquetes de datos
     if cont==1:
         cont=0
         out_string = "s"
         for i in range(5):
             out_string +="{:>4.2f}".format(eje_acumulador[i])+" "
-            #print (out_string)
-            #time.sleep(1)
         arduino.write(out_string.encode())
     else:
         cont += 1
