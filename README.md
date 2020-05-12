@@ -1,4 +1,4 @@
-# python-interfase-joystik
+# python-interfase-joystick
 Esto es un clon del ejemplo de joystick de pygame con una comunicacion serie codificada para un arduino
 
 Esta creado para funcionar con un codigo ad-hoc en el audiono.
